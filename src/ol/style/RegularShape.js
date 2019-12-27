@@ -102,7 +102,7 @@ class RegularShape extends ImageStyle {
      * @type {Array<number>}
      */
     this.radiuses_ = options.radiuses !== undefined ? options.radiuses : (function() {
-      const radiuses = [options.radius1 !== undefined ? options.radius1 : options.radius1];
+      const radiuses = [options.radius1 !== undefined ? options.radius1 : options.radius];
       if (options.radius2 !== undefined) {
         radiuses.push(options.radius2);
       }

@@ -30,7 +30,7 @@ describe('ol.style.RegularShape', function() {
         radius: 10,
         radius2: 5
       });
-      expect(style.getRadiuses().length).to.be(1);
+      expect(style.getRadiuses().length).to.be(2);
       expect(style.getRadiuses()[0]).to.be(10);
       expect(style.getRadiuses()[1]).to.be(5);
     });
