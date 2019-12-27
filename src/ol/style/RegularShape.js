@@ -16,9 +16,10 @@ import ImageStyle from './Image.js';
  * @property {import("./Fill.js").default} [fill] Fill style.
  * @property {number} points Number of points for stars and regular polygons. In case of a polygon, the number of points
  * is the number of sides.
- * @property {number} [radius] Radius of a regular polygon.
- * @property {number} [radius1] Outer radius of a star.
- * @property {number} [radius2] Inner radius of a star.
+ * @property {Array<number>} [radiuses] Radiuses of a regular polygon.
+ * @property {number} [radius] Radius of a regular polygon. Ignored if `radiuses` is given.
+ * @property {number} [radius1] Outer radius of a star. Ignored if `radiuses` is given.
+ * @property {number} [radius2] Inner radius of a star. Ignored if `radiuses` is given.
  * @property {number} [angle=0] Shape's angle in radians. A value of 0 will have one of the shape's point facing up.
  * @property {Array<number>} [displacement=[0,0]] Displacement of the shape
  * @property {import("./Stroke.js").default} [stroke] Stroke style.
@@ -98,15 +99,15 @@ class RegularShape extends ImageStyle {
 
     /**
      * @protected
-     * @type {number}
+     * @type {Array<number>}
      */
-    this.radius_ = options.radius !== undefined ? options.radius : options.radius1;
-
-    /**
-     * @private
-     * @type {number|undefined}
-     */
-    this.radius2_ = options.radius2;
+    this.radiuses_ = options.radiuses !== undefined ? options.radiuses : (function() {
+      const radiuses = [options.radius1 !== undefined ? options.radius1 : options.radius1];
+      if (options.radius2 !== undefined) {
+        radiuses.push(options.radius2);
+      }
+      return radiuses;
+    })();
 
     /**
      * @private
@@ -157,8 +158,7 @@ class RegularShape extends ImageStyle {
     const style = new RegularShape({
       fill: this.getFill() ? this.getFill().clone() : undefined,
       points: this.getPoints(),
-      radius: this.getRadius(),
-      radius2: this.getRadius2(),
+      radiuses: this.getRadiuses().slice(),
       angle: this.getAngle(),
       stroke: this.getStroke() ? this.getStroke().clone() : undefined,
       rotation: this.getRotation(),
@@ -255,7 +255,7 @@ class RegularShape extends ImageStyle {
    * @api
    */
   getRadius() {
-    return this.radius_;
+    return this.radiuses_[0];
   }
 
   /**
@@ -264,7 +264,16 @@ class RegularShape extends ImageStyle {
    * @api
    */
   getRadius2() {
-    return this.radius2_;
+    return this.radiuses_.length > 1 ? this.radiuses_[1] : undefined;
+  }
+
+  /**
+   * Get array of radiuses
+   * @return {Array<number>} Radiuses.
+   * @api
+   */
+  getRadiuses() {
+    return this.radiuses_;
   }
 
   /**
@@ -337,7 +346,7 @@ class RegularShape extends ImageStyle {
       }
     }
 
-    let size = 2 * (this.radius_ + strokeWidth) + 1;
+    let size = 2 * (Math.max(...this.radiuses_) + strokeWidth) + 1;
 
     const renderOptions = {
       strokeStyle: strokeStyle,
@@ -384,25 +393,19 @@ class RegularShape extends ImageStyle {
 
     context.beginPath();
 
-    let points = this.points_;
+    const points = this.points_;
     if (points === Infinity) {
       context.arc(
         renderOptions.size / 2, renderOptions.size / 2,
-        this.radius_, 0, 2 * Math.PI, true);
+        this.radiuses_[0], 0, 2 * Math.PI, true);
     } else {
-      const radius2 = (this.radius2_ !== undefined) ? this.radius2_
-        : this.radius_;
-      if (radius2 !== this.radius_) {
-        points = 2 * points;
-      }
       for (i = 0; i <= points; i++) {
         angle0 = i * 2 * Math.PI / points - Math.PI / 2 + this.angle_;
-        radiusC = i % 2 === 0 ? this.radius_ : radius2;
+        radiusC = this.radiuses_[i % this.radiuses_.length];
         context.lineTo(renderOptions.size / 2 + radiusC * Math.cos(angle0),
           renderOptions.size / 2 + radiusC * Math.sin(angle0));
       }
     }
-
 
     if (this.fill_) {
       let color = this.fill_.getColor();
@@ -476,21 +479,16 @@ class RegularShape extends ImageStyle {
 
     context.beginPath();
 
-    let points = this.points_;
+    const points = this.points_;
     if (points === Infinity) {
       context.arc(
         renderOptions.size / 2, renderOptions.size / 2,
-        this.radius_, 0, 2 * Math.PI, true);
+        this.radiuses_[0], 0, 2 * Math.PI, true);
     } else {
-      const radius2 = (this.radius2_ !== undefined) ? this.radius2_
-        : this.radius_;
-      if (radius2 !== this.radius_) {
-        points = 2 * points;
-      }
       let i, radiusC, angle0;
       for (i = 0; i <= points; i++) {
         angle0 = i * 2 * Math.PI / points - Math.PI / 2 + this.angle_;
-        radiusC = i % 2 === 0 ? this.radius_ : radius2;
+        radiusC = this.radiuses_[i % this.radiuses_.length];
         context.lineTo(renderOptions.size / 2 + radiusC * Math.cos(angle0),
           renderOptions.size / 2 + radiusC * Math.sin(angle0));
       }
