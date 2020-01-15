@@ -36,8 +36,8 @@ function createFeatures(stroke, fill, offSet = [0, 0]) {
     image: new RegularShape({
       fill: fill,
       stroke: stroke,
-      points: 3,
-      radius: 10,
+      points: 1,
+      radiuses: [10, 10, 10, 0],
       rotation: Math.PI / 4,
       angle: 0
     })
