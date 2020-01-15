@@ -60,6 +60,15 @@ const styles = {
       angle: Math.PI / 4
     })
   }),
+  'bold-cross': new Style({
+    image: new RegularShape({
+      fill: fill,
+      stroke: stroke,
+      points: 4,
+      radiuses: [10, 10, 5, 5],
+      angle: Math.PI / 4
+    })
+  }),
   'stacked': [
     new Style({
       image: new RegularShape({
@@ -84,8 +93,8 @@ const styles = {
 };
 
 
-const styleKeys = ['x', 'cross', 'star', 'triangle', 'square', 'stacked'];
-const count = 250;
+const styleKeys = ['x', 'cross', 'star', 'triangle', 'square', 'bold-cross', 'stacked'];
+const count = 100;
 const features = new Array(count);
 const e = 4500000;
 for (let i = 0; i < count; ++i) {
