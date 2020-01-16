@@ -24,6 +24,7 @@ import ImageStyle from './Image.js';
  * @property {number} points Number of points for stars and regular polygons. In case of a polygon, the number of points
  * is the number of sides.
  * @property {Array<number>} [radiuses] Radiuses of a regular polygon.
+ * @property {Array<number>} [angleRatios] Radius ratios
  * @property {number} [radius] Radius of a regular polygon. Ignored if `radiuses` is given.
  * @property {number} [radius1] Outer radius of a star. Ignored if `radiuses` is given.
  * @property {number} [radius2] Inner radius of a star. Ignored if `radiuses` is given.
@@ -73,6 +74,12 @@ class RegularShape extends ImageStyle {
       scale: 1,
       displacement: options.displacement !== undefined ? options.displacement : [0, 0]
     });
+
+    /**
+     * @protected
+     * @type {Array<number>}
+     */
+    this.angleRatios_ = options.angleRatios;
 
     /**
      * @private
@@ -166,6 +173,7 @@ class RegularShape extends ImageStyle {
       fill: this.getFill() ? this.getFill().clone() : undefined,
       points: this.getPoints(),
       radiuses: this.getRadiuses().slice(),
+      angleRatios: this.getAngleRatios().slice(),
       angle: this.getAngle(),
       stroke: this.getStroke() ? this.getStroke().clone() : undefined,
       rotation: this.getRotation(),
@@ -284,6 +292,15 @@ class RegularShape extends ImageStyle {
   }
 
   /**
+   * Get array of angle ratios
+   * @return {Array<number>} Angle ratios.
+   * @api
+   */
+  getAngleRatios() {
+    return this.angleRatios_;
+  }
+
+  /**
    * @inheritDoc
    * @api
    */
@@ -389,18 +406,31 @@ class RegularShape extends ImageStyle {
    * @param {CanvasRenderingContext2D} context The rendering context.
    */
   drawShape_(renderOptions, context) {
-    const points = this.points_ * this.radiuses_.length;
-    if (points === Infinity) {
+    if (this.points_ === Infinity) {
       context.arc(
         renderOptions.size / 2, renderOptions.size / 2,
         this.radiuses_[0], 0, 2 * Math.PI, true);
     } else {
-      for (let i = 0; i <= points; i++) {
-        const angle0 = i * 2 * Math.PI / points - Math.PI / 2 + this.angle_;
-        const radiusC = this.radiuses_[i % this.radiuses_.length];
-        context.lineTo(renderOptions.size / 2 + radiusC * Math.cos(angle0),
-          renderOptions.size / 2 + radiusC * Math.sin(angle0));
+      const radiuses = this.radiuses_.length;
+      const baseAngle = this.angle_;
+      const segments = this.points_;
+      const angleUnit = 2 * Math.PI / segments;
+      for (let i = 0; i < this.points_; i++) {
+        const angle0 = i * angleUnit - Math.PI / 2 + baseAngle;
+        for (let j = 0; j < radiuses; j++) {
+          const index = j % radiuses;
+          const radiusC = this.radiuses_[index];
+          let angle = angle0;
+          if (this.angleRatios_ !== undefined) {
+            angle += angleUnit * this.angleRatios_[j];
+          } else {
+            angle += angleUnit * j / radiuses;
+          }
+          context.lineTo(renderOptions.size / 2 + radiusC * Math.cos(angle),
+            renderOptions.size / 2 + radiusC * Math.sin(angle));
+        }
       }
+      context.closePath();
     }
   }
 

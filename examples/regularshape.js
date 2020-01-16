@@ -64,9 +64,9 @@ const styles = {
     image: new RegularShape({
       fill: fill,
       stroke: stroke,
-      points: 4,
-      radiuses: [10, 10, 5, 5],
-      angle: Math.PI / 4
+      points: 3,
+      radiuses: [15, 5, 5, 15],
+      angleRatios: [0.25, 0.25, 0.75, 0.75]
     })
   }),
   'stacked': [
@@ -100,7 +100,7 @@ const e = 4500000;
 for (let i = 0; i < count; ++i) {
   const coordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
   features[i] = new Feature(new Point(coordinates));
-  features[i].setStyle(styles[styleKeys[Math.floor(Math.random() * 6)]]);
+  features[i].setStyle(styles[styleKeys[Math.floor(Math.random() * styleKeys.length)]]);
 }
 
 const source = new VectorSource({
