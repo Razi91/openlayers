@@ -173,7 +173,7 @@ class RegularShape extends ImageStyle {
       fill: this.getFill() ? this.getFill().clone() : undefined,
       points: this.getPoints(),
       radiuses: this.getRadiuses().slice(),
-      angleRatios: this.getAngleRatios().slice(),
+      angleRatios: this.getAngleRatios() ? this.getAngleRatios().slice() : undefined,
       angle: this.getAngle(),
       stroke: this.getStroke() ? this.getStroke().clone() : undefined,
       rotation: this.getRotation(),
